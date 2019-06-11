@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="fr">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html;charset=UTF-8" />
+        <title>Guess What</title>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.5/css/bulma.css"></script>
+    </head>
+    <body>
+        <div id="app">
+            <div class="modal" v-if="!isRegistered">
+                <div class="modal-background"></div>
+                <div class="modal-content">
+                    <div class="field">
+                        <div class="control">
+                            <input
+                                class="input"
+                                type="text"
+                                placeholder="Username"
+                                v-model="username"
+                            />
+                        </div>
+                    </div>
+                    <div class="field">
+                        <div class="control">
+                            <input
+                                class="input"
+                                type="text"
+                                placeholder="Room name"
+                                v-model="roomSelected"
+                            />
+                        </div>
+                    </div>
+                    <div class="select">
+                        <select v-model="roomSelected">
+                            <option :value="room.name" v-for="room in rooms">
+                                {{ room.name }}
+                            </option>
+                        </select>
+                    </div>
+                    <button class="button" @click="join()">Join</button>
+                </div>
+            </div>
+        </div>
+        <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+        <script src="./app.js"></script>
+    </body>
+</html>
