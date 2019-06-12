@@ -1,6 +1,9 @@
 package main
 
-import "fmt"
+import (
+	"encoding/json"
+	"fmt"
+)
 
 //Room Object
 type Room struct {
@@ -60,10 +63,12 @@ func NewRoom(name string) (room *Room) {
 }
 
 func getRooms() (roomsName string) {
-	roomsName = "'rooms': {"
-	for room := range rooms {
-		roomsName = fmt.Sprint(roomsName + "'" + room + "', ")
+	var roomsSlice []string
+	for _, room := range rooms {
+		roomsSlice = append(roomsSlice, room.Name)
 	}
-	roomsName = fmt.Sprint(roomsName + "}")
+	roomsJSON, err := json.Marshal(roomsSlice)
+	Error(err)
+	roomsName = fmt.Sprintln(string(roomsJSON))
 	return roomsName
 }

@@ -51,14 +51,10 @@ func Error(err error) {
 
 //SendData Method
 func SendData(event string, content string, conn *websocket.Conn) {
-	jsonContent := `{"` + content + `"}`
-	result, err := json.Marshal(jsonContent)
-	Error(err)
-	err = conn.WriteJSON(Bus{
+	err := conn.WriteJSON(&Bus{
 		Event:   event,
-		Content: string(result),
+		Content: content,
 	})
-	//log.Println("SYSTEM: event=", event, "content =", content)
 	Error(err)
 }
 
@@ -88,9 +84,9 @@ func start(w http.ResponseWriter, r *http.Request) {
 
 	//client send his username and room name
 	event, content := ReceiveData(conn)
-	log.Println("SYSTEM: data received: event=", event)
+	log.Println("SYSTEM: data received: event =", event)
 	for key, value := range content {
-		log.Println("SYSTEM: data received: content=", key, "=", value)
+		log.Println("SYSTEM: data received: content =", key, "=", value)
 	}
 
 	if content["room"] == "" {
