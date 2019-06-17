@@ -33,12 +33,16 @@
         </div>
         <div class="select">
           <select v-model="roomSelected">
-            <option :value="room.name" v-for="room in rooms">
+            <option :value="room" v-for="room in rooms">
               {{ room }}
             </option>
           </select>
         </div>
         <button class="button" @click="join()">Join</button>
+      </div>
+      <div v-else>
+        <p>Username: {{ username }}</p>
+        <p>Room: {{ room }}</p>
       </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>

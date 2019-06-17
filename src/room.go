@@ -3,12 +3,13 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 )
 
 //Room Object
 type Room struct {
 	Name  string
-	Users map[*User]bool
+	Users map[string]*User
 	Join  chan *User
 	Leave chan *User
 	Input chan *Message
@@ -16,37 +17,50 @@ type Room struct {
 
 var rooms = make(map[string]*Room)
 
-func (r *Room) run() {
-flag:
+//AddUser method forward a user to the channel join
+func (room *Room) AddUser(user *User) {
+	log.Println("SYSTEM:", user.username, "has joined the room", room.Name)
+	room.Join <- user
+	user.room = room
+}
+
+//RemoveUser Method forward a user to the channel Leave
+func (room *Room) RemoveUser(user *User) {
+	log.Println("SYSTEM:", user.username, "has left the room", room.Name)
+	room.Leave <- user
+	user.room = nil
+}
+
+//InputMessage Method forward a message to the input channel
+func (room *Room) InputMessage(message *Message) {
+	log.Println("SYSTEM:", message.Username, "send:", message.Text)
+	room.Input <- message
+}
+
+//sendAll Method forward message to all user
+func (room *Room) sendAll(message *Message) {
+	for _, user := range room.Users {
+		user.Write(message)
+	}
+}
+
+func (room *Room) run() {
+	log.Println("SYSTEM: Room", room.Name, "successfully started")
 	for {
 		select {
-		case user := <-r.Join:
-			r.Users[user] = true
-			go func() {
-				r.Input <- &Message{
-					Username: "SYSTEM",
-					Text:     fmt.Sprintln(user.username, "joined"),
-				}
-			}()
-		case user := <-r.Leave:
-			delete(r.Users, user)
-			go func() {
-				r.Input <- &Message{
-					Username: "SYSTEM",
-					Text:     fmt.Sprintln(user.username, "left"),
-				}
-			}()
-			if len(r.Users) == 0 {
-				delete(rooms, r.Name)
-				close(r.Join)
-				close(r.Leave)
-				close(r.Input)
-				break flag
+		case user := <-room.Join:
+			room.Users[user.username] = user
+		case user := <-room.Leave:
+			delete(room.Users, user.username)
+			if len(room.Users) == 0 {
+				delete(rooms, room.Name)
+				close(room.Join)
+				close(room.Leave)
+				close(room.Input)
+				log.Println("SYSTEM: Room", room.Name, "closed")
 			}
-		case msg := <-r.Input:
-			for user := range r.Users {
-				user.output <- msg
-			}
+		case msg := <-room.Input:
+			room.sendAll(msg)
 		}
 	}
 }
@@ -55,7 +69,7 @@ flag:
 func NewRoom(name string) (room *Room) {
 	return &Room{
 		Name:  name,
-		Users: make(map[*User]bool),
+		Users: make(map[string]*User),
 		Join:  make(chan *User),
 		Leave: make(chan *User),
 		Input: make(chan *Message),
@@ -69,6 +83,6 @@ func getRooms() (roomsName string) {
 	}
 	roomsJSON, err := json.Marshal(roomsSlice)
 	Error(err)
-	roomsName = fmt.Sprintln(string(roomsJSON))
+	roomsName = fmt.Sprint(string(roomsJSON))
 	return roomsName
 }

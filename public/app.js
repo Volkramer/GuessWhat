@@ -6,7 +6,6 @@ new Vue({
     rooms: [],
     room: "",
     username: "",
-    dialog: true,
     isRegistered: false,
   },
   mounted() {
@@ -15,19 +14,39 @@ new Vue({
     this.ws.onmessage = e => {
       var dataJson = JSON.parse(e.data);
       console.log(dataJson);
-      if (dataJson.event === "getRooms") {
-        this.rooms = JSON.parse(dataJson.content);
+      if (typeof dataJson.content === "object") {
+        content = dataJson.content;
+      } else {
+        content = JSON.parse(dataJson.content);
+      }
+      console.log(content);
+
+      switch (dataJson.event) {
+        case "getRooms":
+          this.rooms = content;
+          break;
+        case "newUser":
+          this.room = content.room;
+          this.username = content.username;
+          this.isRegistered = true;
+
+          break;
+
+        default:
+          break;
       }
     };
-    this.ws.onclose = e => {};
+    this.ws.onclose = e => {
+      console.log(e.data);
+    };
   },
   methods: {
     join() {
-      if (!this.username) {
+      if (this.username === "") {
         console.log("no valid username");
       }
-      if (!this.roomSelected) {
-        console.log("no valid game selected");
+      if (this.roomSelected === "") {
+        console.log("no valid room selected");
       } else {
         this.ws.send(
           JSON.stringify({
