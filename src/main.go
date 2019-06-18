@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"sync"
 
 	"github.com/gorilla/websocket"
 )
@@ -15,6 +16,8 @@ var upgrader = websocket.Upgrader{
 		return true
 	},
 }
+
+var mux sync.Mutex
 
 //Registration Object
 type registration struct {
@@ -50,21 +53,25 @@ func Error(err error) {
 
 //SendData Method
 func SendData(event string, content interface{}, conn *websocket.Conn) {
+	mux.Lock()
 	err := conn.WriteJSON(&Bus{
 		Event:   event,
 		Content: content,
 	})
 	Error(err)
+	mux.Unlock()
 }
 
 //ReceiveData Method
 func ReceiveData(conn *websocket.Conn) (event string, content map[string]string) {
+	mux.Lock()
 	var bus Bus
 	var result map[string]string
 	err := conn.ReadJSON(&bus)
 	Error(err)
 	event = bus.Event
 	json.Unmarshal([]byte(bus.Content.(string)), &result)
+	mux.Unlock()
 	return event, result
 }
 
@@ -108,13 +115,13 @@ func start(w http.ResponseWriter, r *http.Request) {
 				if newRoom == nil {
 					log.Println("SYSTEM: Creating new room failed")
 				}
-				rooms[newRoom.Name] = newRoom
+				rooms[newRoom.name] = newRoom
 				go newRoom.run()
 				newRoom.AddUser(user)
 			}
 			data := Join{
 				Username: user.username,
-				Room:     user.room.Name,
+				Room:     user.room.name,
 			}
 			SendData("newUser", data, conn)
 		}

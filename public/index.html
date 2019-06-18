@@ -41,8 +41,27 @@
         <button class="button" @click="join()">Join</button>
       </div>
       <div v-else>
-        <p>Username: {{ username }}</p>
-        <p>Room: {{ room }}</p>
+        <div class="box">
+          <p>Username: {{ username }}</p>
+          <p>Room: {{ room }}</p>
+        </div>
+        <div class="box">
+          <div v-for="user in users">
+            <p>{{ user }}</p>
+          </div>
+        </div>
+        <div class="box">
+          <div v-for="message in messages">
+            <p>{{ message.username }}: {{ message.text }}</p>
+          </div>
+          <input
+            class="input"
+            type="text"
+            placeholder=""
+            v-model="newMessage"
+          />
+          <button class="button" @click="comment">Say!!</button>
+        </div>
       </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>

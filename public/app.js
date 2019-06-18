@@ -7,6 +7,11 @@ new Vue({
     room: "",
     username: "",
     isRegistered: false,
+    users: [],
+    user: "",
+    messages: [],
+    message: "",
+    newMessage: "",
   },
   mounted() {
     this.ws = new WebSocket("ws://" + window.location.host + "/ws");
@@ -14,24 +19,22 @@ new Vue({
     this.ws.onmessage = e => {
       var dataJson = JSON.parse(e.data);
       console.log(dataJson);
-      if (typeof dataJson.content === "object") {
-        content = dataJson.content;
-      } else {
-        content = JSON.parse(dataJson.content);
-      }
-      console.log(content);
-
+      content = dataJson.content;
       switch (dataJson.event) {
         case "getRooms":
-          this.rooms = content;
+          this.rooms = JSON.parse(content);
           break;
         case "newUser":
           this.room = content.room;
           this.username = content.username;
           this.isRegistered = true;
-
           break;
-
+        case "userJoin":
+          this.users.push(content);
+          break;
+        case "message":
+          this.messages.push(content);
+          break;
         default:
           break;
       }
@@ -56,6 +59,23 @@ new Vue({
               this.username +
               '","room":"' +
               this.roomSelected +
+              '"}',
+          })
+        );
+      }
+    },
+
+    Leave() {},
+    comment() {
+      if (this.newMessage !== "") {
+        this.ws.send(
+          JSON.stringify({
+            event: "message",
+            content:
+              '{"username":"' +
+              this.username +
+              '","text":"' +
+              this.newMessage +
               '"}',
           })
         );
