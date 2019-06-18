@@ -33,6 +33,7 @@ new Vue({
           this.users.push(content);
           break;
         case "message":
+          console.log(content);
           this.messages.push(content);
           break;
         default:

@@ -124,6 +124,7 @@ func start(w http.ResponseWriter, r *http.Request) {
 				Room:     user.room.name,
 			}
 			SendData("newUser", data, conn)
+			user.Listen()
 		}
 	}
 }

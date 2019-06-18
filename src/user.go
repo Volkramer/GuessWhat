@@ -53,7 +53,7 @@ func (user *User) listenWrite() {
 	for {
 		select {
 		case msg := <-user.output:
-			SendData("message", &msg, user.conn)
+			SendData("message", msg, user.conn)
 		}
 	}
 }
@@ -65,8 +65,8 @@ func (user *User) listenRead() {
 			var message Message
 			event, content := ReceiveData(user.conn)
 			if event == "message" {
-				message.Text = content["Text"]
-				message.Username = content["Username"]
+				message.Text = content["text"]
+				message.Username = content["username"]
 				user.room.InputMessage(&message)
 			}
 		}
