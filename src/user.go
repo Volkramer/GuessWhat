@@ -1,6 +1,8 @@
 package main
 
 import (
+	"log"
+
 	"github.com/gorilla/websocket"
 )
 
@@ -26,8 +28,9 @@ func (user *User) read() {
 		user.room.leave <- user
 	}()
 	for {
-		_, data, err := user.socket.ReadMessage()
+		msgT, data, err := user.socket.ReadMessage()
 		if err != nil {
+			log.Println(msgT, ":", err)
 			break
 		}
 		user.room.onMessage(data, user)
