@@ -8,18 +8,18 @@ import (
 
 //User Object
 type User struct {
-	name   string
-	room   *Room
-	socket *websocket.Conn
-	output chan []byte
+	username string
+	room     *Room
+	socket   *websocket.Conn
+	output   chan []byte
 }
 
 func newUser(name string, room *Room, socket *websocket.Conn) *User {
 	return &User{
-		name:   name,
-		room:   room,
-		socket: socket,
-		output: make(chan []byte),
+		username: name,
+		room:     room,
+		socket:   socket,
+		output:   make(chan []byte),
 	}
 }
 

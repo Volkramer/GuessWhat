@@ -36,7 +36,7 @@ func start(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "could not connect", http.StatusInternalServerError)
 		return
 	}
-	log.Println(socket.RemoteAddr(), "connected")
+	// log.Println(socket.RemoteAddr(), "connected")
 
 	/* //Send list of rooms to the client
 	SendData("getRooms", getRooms(), conn)
