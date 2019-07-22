@@ -18,7 +18,7 @@ func newMessage(username string, message string) *Message {
 //MsgSystem structure
 type MsgSystem struct {
 	Event      string `json:"event,omitempty"`
-	SysMessage string `json:"sysmessage,omitempty"`
+	SysMessage string `json:"systemMessage,omitempty"`
 }
 
 func newMsgSystem(systemMessage string) *MsgSystem {

@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 )
 
@@ -27,7 +28,7 @@ func (server *Server) start() {
 		select {
 		case client := <-server.register:
 			server.clients[client] = true
-			jsonMessage, err := json.Marshal(newMsgSystem("/A new socket has connected."))
+			jsonMessage, err := json.Marshal(newMsgSystem(fmt.Sprintln(client.username, "has joined the game")))
 			if err != nil {
 				log.Println(err)
 			}
@@ -36,7 +37,7 @@ func (server *Server) start() {
 			if _, ok := server.clients[client]; ok {
 				close(client.send)
 				delete(server.clients, client)
-				jsonMessage, err := json.Marshal(newMsgSystem("/A socket has disconnected."))
+				jsonMessage, err := json.Marshal(newMsgSystem(fmt.Sprintln(client.username, "has left the game")))
 				if err != nil {
 					log.Println(err)
 				}

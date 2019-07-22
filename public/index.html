@@ -8,7 +8,16 @@
 </head>
 
 <body>
-
+    <div id="app">
+        <div v-if="!connected">
+            <p>Entre votre pseudo</p>
+            <input v-model="newUsername" type="text" />
+            <button v-on:click="join">Valider</button>
+        </div>
+        <div v-else>
+            Bienvenue {{username}}
+        </div>
+    </div>
     <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
     <script src="./app.js"></script>
 </body>
