@@ -20,16 +20,18 @@ func main() {
 	server := newServer()
 	go server.start()
 	log.Println("System: Server started successfully at address: http://localhost:8000")
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		http.ServeFile(w, r, "../public/index.html")
-	})
-	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
-		wsPage(server, w, r)
-	})
+	router(server)
 	http.ListenAndServe(":8000", nil)
 }
 
-func wsPage(server *Server, w http.ResponseWriter, r *http.Request) {
+func router(server *Server) {
+	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
+		start(server, w, r)
+	})
+	http.Handle("/", http.FileServer(http.Dir("./public")))
+}
+
+func start(server *Server, w http.ResponseWriter, r *http.Request) {
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		http.NotFound(w, r)
