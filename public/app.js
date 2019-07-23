@@ -4,14 +4,34 @@ new Vue({
     ws: null,
     newUsername: "",
     username: "",
-    connected: false
+    connected: false,
+    messages: [],
+    message: "",
+    newMessage: "",
   },
   mounted() {
     this.ws = new WebSocket("ws://" + window.location.host + "/ws");
     this.ws.onopen = () => {};
     this.ws.onmessage = e => {
       var dataJson = JSON.parse(e.data);
-      console.log(dataJson);
+      //console.log(dataJson);
+      //console.log(this.messages);
+      switch (dataJson.event) {
+        case "clientJoined":
+          this.username = dataJson.username;
+          this.connected = true;
+          break;
+        case "system":
+          this.message = "SYSTEM: " + dataJson.systemMessage;
+          this.messages.push(this.message);
+          break;
+        case "message":
+          this.message = dataJson.username + ": " + dataJson.message;
+          this.messages.push(this.message);
+          break;
+        default:
+          break;
+      }
     };
     this.ws.onclose = e => {
       console.log(e.data);
@@ -20,13 +40,21 @@ new Vue({
   methods: {
     join() {
       if (!(this.newUsername == null || this.newUsername == "")) {
-        this.username = this.newUsername;
-        this.connected = true;
         data = {
           event: "clientJoined",
-          username: this.username,
+          username: this.newUsername,
         }
-        console.log(data);
+        //console.log(data);
+        this.ws.send(JSON.stringify(data));
+      }
+    },
+    postMessage() {
+      if (!(this.newMessage == null || this.newMessage == "")) {
+        data = {
+          event: "message",
+          username: this.username,
+          message: this.newMessage,
+        }
         this.ws.send(JSON.stringify(data));
       }
     }

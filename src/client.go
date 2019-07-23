@@ -1,8 +1,8 @@
 package main
 
 import (
-	"encoding/json"
 	"log"
+	"sync"
 
 	"github.com/gorilla/websocket"
 )
@@ -12,7 +12,8 @@ type Client struct {
 	username string
 	server   *Server
 	socket   *websocket.Conn
-	send     chan []byte
+	send     chan interface{}
+	mux      sync.Mutex
 }
 
 func newClient(username string, server *Server, socket *websocket.Conn) *Client {
@@ -20,7 +21,7 @@ func newClient(username string, server *Server, socket *websocket.Conn) *Client 
 		username: username,
 		server:   server,
 		socket:   socket,
-		send:     make(chan []byte),
+		send:     make(chan interface{}),
 	}
 }
 
@@ -31,15 +32,15 @@ func (client *Client) read() {
 	}()
 
 	for {
-		_, message, err := client.socket.ReadMessage()
+		var message *Message
+		err := client.socket.ReadJSON(&message)
 		if err != nil {
 			log.Println(err)
 			client.server.unregister <- client
 			client.socket.Close()
 			break
 		}
-		jsonMessage, err := json.Marshal(newMessage(client.username, string(message)))
-		client.server.broadcast <- jsonMessage
+		client.server.broadcast <- message
 	}
 }
 
@@ -55,7 +56,16 @@ func (client *Client) write() {
 				client.socket.WriteMessage(websocket.CloseMessage, []byte{})
 				return
 			}
-			client.socket.WriteMessage(websocket.TextMessage, message)
+			err := client.sendData(message)
+			if err != nil {
+				log.Println(err)
+			}
 		}
 	}
+}
+
+func (client *Client) sendData(data interface{}) error {
+	client.mux.Lock()
+	defer client.mux.Unlock()
+	return client.socket.WriteJSON(data)
 }

@@ -3,13 +3,13 @@ package main
 //Message structure
 type Message struct {
 	Event    string `json:"event,omitempty"`
-	Username string `json:"email,omitempty"`
+	Username string `json:"username,omitempty"`
 	Message  string `json:"message,omitempty"`
 }
 
 func newMessage(username string, message string) *Message {
 	return &Message{
-		Event:    "Message",
+		Event:    "message",
 		Username: username,
 		Message:  message,
 	}
@@ -23,7 +23,7 @@ type MsgSystem struct {
 
 func newMsgSystem(systemMessage string) *MsgSystem {
 	return &MsgSystem{
-		Event:      "System",
+		Event:      "system",
 		SysMessage: systemMessage,
 	}
 }
@@ -32,4 +32,11 @@ func newMsgSystem(systemMessage string) *MsgSystem {
 type MsgJoin struct {
 	Event    string `json:"event,omitempty"`
 	Username string `json:"username,omitempty"`
+}
+
+func newMsgJoin(username string) *MsgJoin {
+	return &MsgJoin{
+		Event:    "clientJoined",
+		Username: username,
+	}
 }

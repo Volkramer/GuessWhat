@@ -1,15 +1,13 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
-	"log"
 )
 
 //Server structure
 type Server struct {
 	clients    map[*Client]bool
-	broadcast  chan []byte
+	broadcast  chan interface{}
 	register   chan *Client
 	unregister chan *Client
 }
@@ -17,7 +15,7 @@ type Server struct {
 func newServer() *Server {
 	return &Server{
 		clients:    make(map[*Client]bool),
-		broadcast:  make(chan []byte),
+		broadcast:  make(chan interface{}),
 		register:   make(chan *Client),
 		unregister: make(chan *Client),
 	}
@@ -28,20 +26,14 @@ func (server *Server) start() {
 		select {
 		case client := <-server.register:
 			server.clients[client] = true
-			jsonMessage, err := json.Marshal(newMsgSystem(fmt.Sprintln(client.username, "has joined the game")))
-			if err != nil {
-				log.Println(err)
-			}
-			server.send(jsonMessage, client)
+			msgSystem := newMsgSystem(fmt.Sprintln(client.username, "has joined the game"))
+			server.send(msgSystem, client)
 		case client := <-server.unregister:
 			if _, ok := server.clients[client]; ok {
 				close(client.send)
 				delete(server.clients, client)
-				jsonMessage, err := json.Marshal(newMsgSystem(fmt.Sprintln(client.username, "has left the game")))
-				if err != nil {
-					log.Println(err)
-				}
-				server.send(jsonMessage, client)
+				msgSystem := newMsgSystem(fmt.Sprintln(client.username, "has left the game"))
+				server.send(msgSystem, client)
 			}
 		case message := <-server.broadcast:
 			for client := range server.clients {
@@ -56,7 +48,7 @@ func (server *Server) start() {
 	}
 }
 
-func (server *Server) send(message []byte, ignore *Client) {
+func (server *Server) send(message interface{}, ignore *Client) {
 	for client := range server.clients {
 		if client != ignore {
 			client.send <- message

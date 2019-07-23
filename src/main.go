@@ -39,14 +39,20 @@ func start(server *Server, w http.ResponseWriter, r *http.Request) {
 	}
 	log.Println("SYSTEM: client", conn.RemoteAddr(), "connected")
 	var msgJoin *MsgJoin
-	for {
-		err = conn.ReadJSON(&msgJoin)
-		if msgJoin.Event == "clientJoined" {
-			client := newClient(msgJoin.Username, server, conn)
-			server.register <- client
-			log.Println("SYSTEM: client", client.username, "has joined the game")
-			go client.read()
-			go client.write()
+	err = conn.ReadJSON(&msgJoin)
+	if err != nil {
+		log.Println(err)
+	}
+	if msgJoin.Event == "clientJoined" {
+		client := newClient(msgJoin.Username, server, conn)
+		server.register <- client
+		err = client.sendData(newMsgJoin(client.username))
+		if err != nil {
+			log.Println(err)
 		}
+		log.Println("SYSTEM: client", client.username, "has joined the game")
+		go client.read()
+		go client.write()
+
 	}
 }
