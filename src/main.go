@@ -7,6 +7,7 @@ import (
 	"github.com/gorilla/websocket"
 )
 
+//upgrade http protocol to ws protocol
 var upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
 	WriteBufferSize: 1024,
@@ -24,6 +25,7 @@ func main() {
 	http.ListenAndServe(":8000", nil)
 }
 
+//handle route
 func router(server *Server) {
 	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
 		start(server, w, r)
@@ -31,6 +33,7 @@ func router(server *Server) {
 	http.Handle("/", http.FileServer(http.Dir("./public")))
 }
 
+//Server Routine
 func start(server *Server, w http.ResponseWriter, r *http.Request) {
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {

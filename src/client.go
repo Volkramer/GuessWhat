@@ -16,6 +16,7 @@ type Client struct {
 	mux      sync.Mutex
 }
 
+//Client constructor
 func newClient(username string, server *Server, socket *websocket.Conn) *Client {
 	return &Client{
 		username: username,
@@ -25,6 +26,7 @@ func newClient(username string, server *Server, socket *websocket.Conn) *Client 
 	}
 }
 
+//Read data from the front and broadcast it accross the server
 func (client *Client) read() {
 	defer func() {
 		client.server.unregister <- client
@@ -44,6 +46,7 @@ func (client *Client) read() {
 	}
 }
 
+//Write to the front data received from server
 func (client *Client) write() {
 	defer func() {
 		client.socket.Close()
@@ -64,6 +67,7 @@ func (client *Client) write() {
 	}
 }
 
+//writer with mutex
 func (client *Client) sendData(data interface{}) error {
 	client.mux.Lock()
 	defer client.mux.Unlock()
