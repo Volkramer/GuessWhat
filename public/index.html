@@ -17,8 +17,12 @@
             </form>
         </div>
         <div v-else>
-            Bienvenue {{username}}
-            <div>
+            <div class="box">
+                <li v-for="item in clients">
+                    {{ item }}
+                </li>
+            </div>
+            <div class="box">
                 <ul id="chat">
                     <li v-for="item in messages">
                         {{ item }}

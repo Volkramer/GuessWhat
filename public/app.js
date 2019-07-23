@@ -8,6 +8,7 @@ new Vue({
     messages: [],
     message: "",
     newMessage: "",
+    clients: []
   },
   mounted() {
     this.ws = new WebSocket("ws://" + window.location.host + "/ws");
@@ -29,6 +30,9 @@ new Vue({
           this.message = dataJson.username + ": " + dataJson.message;
           this.messages.push(this.message);
           break;
+        case "clientList":
+          this.clients = dataJson.clients;
+          break;
         default:
           break;
       }
@@ -42,8 +46,8 @@ new Vue({
       if (!(this.newUsername == null || this.newUsername == "")) {
         data = {
           event: "clientJoined",
-          username: this.newUsername,
-        }
+          username: this.newUsername
+        };
         //console.log(data);
         this.ws.send(JSON.stringify(data));
       }
@@ -53,9 +57,10 @@ new Vue({
         data = {
           event: "message",
           username: this.username,
-          message: this.newMessage,
-        }
+          message: this.newMessage
+        };
         this.ws.send(JSON.stringify(data));
+        this.newMessage = "";
       }
     }
   }

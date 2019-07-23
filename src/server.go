@@ -12,6 +12,7 @@ type Server struct {
 	unregister chan *Client
 }
 
+//Server Object constructor
 func newServer() *Server {
 	return &Server{
 		clients:    make(map[*Client]bool),
@@ -21,6 +22,7 @@ func newServer() *Server {
 	}
 }
 
+//Server Loop routine
 func (server *Server) start() {
 	for {
 		select {
@@ -28,12 +30,16 @@ func (server *Server) start() {
 			server.clients[client] = true
 			msgSystem := newMsgSystem(fmt.Sprintln(client.username, "has joined the game"))
 			server.send(msgSystem, client)
+			MsgClientList := newMsgClientList(server)
+			server.send(MsgClientList, nil)
 		case client := <-server.unregister:
 			if _, ok := server.clients[client]; ok {
 				close(client.send)
 				delete(server.clients, client)
 				msgSystem := newMsgSystem(fmt.Sprintln(client.username, "has left the game"))
 				server.send(msgSystem, client)
+				MsgClientList := newMsgClientList(server)
+				server.send(MsgClientList, nil)
 			}
 		case message := <-server.broadcast:
 			for client := range server.clients {
@@ -48,6 +54,7 @@ func (server *Server) start() {
 	}
 }
 
+//Send incoming message to all connected client
 func (server *Server) send(message interface{}, ignore *Client) {
 	for client := range server.clients {
 		if client != ignore {
