@@ -46,16 +46,19 @@ func start(server *Server, w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Println(err)
 	}
-	if msgJoin.Event == "clientJoined" {
-		client := newClient(msgJoin.Username, server, conn)
-		server.register <- client
-		err = client.sendData(newMsgJoin(client.username))
-		if err != nil {
-			log.Println(err)
+	if msgJoin != nil {
+		if msgJoin.Event == "clientJoined" {
+			client := newClient(msgJoin.Username, server, conn)
+			server.register <- client
+			err = client.sendData(newMsgJoin(client.username))
+			if err != nil {
+				log.Println(err)
+			}
+			log.Println("SYSTEM: client", client.username, "has joined the game")
+			go client.read()
+			go client.write()
 		}
-		log.Println("SYSTEM: client", client.username, "has joined the game")
-		go client.read()
-		go client.write()
-
+	} else {
+		conn.Close()
 	}
 }

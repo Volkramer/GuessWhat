@@ -37,9 +37,6 @@ new Vue({
           break;
       }
     };
-    this.ws.onclose = e => {
-      console.log(e.data);
-    };
   },
   methods: {
     join() {
