@@ -34,7 +34,7 @@ func (client *Client) read() {
 	}()
 
 	for {
-		var message *Message
+		var message interface{}
 		err := client.socket.ReadJSON(&message)
 		if err != nil {
 			log.Println(err)
